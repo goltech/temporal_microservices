@@ -3,6 +3,8 @@ package workflow
 import (
 	"math"
 	"temporal_microservices"
+	workflow_context "temporal_microservices/context/workflow"
+	"temporal_microservices/domain"
 	"temporal_microservices/domain/square"
 	"temporal_microservices/domain/volume"
 	"time"
@@ -11,6 +13,8 @@ import (
 	"go.temporal.io/sdk/temporal"
 	"go.temporal.io/sdk/workflow"
 )
+
+var CalculateParallelepipedWorkflowName = domain.GetActivityName(CalculateParallelepipedWorkflow)
 
 type Parallelepiped struct {
 	ID         string
@@ -31,6 +35,11 @@ type CalculateParallelepipedWorkflowResponse struct {
 }
 
 func CalculateParallelepipedWorkflow(ctx workflow.Context, req CalculateParallelepipedWorkflowRequest) (resp CalculateParallelepipedWorkflowResponse, err error) {
+	ctx, span := workflow_context.StartSpan(ctx, "FiguresWorkflow")
+	defer func() {
+		span.Finish(err)
+	}()
+
 	if len(req.Parallelepipeds) == 0 {
 		err = BusinessError{"there are no figures to process"}
 		return

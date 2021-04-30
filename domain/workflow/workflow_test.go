@@ -1,8 +1,10 @@
 package workflow
 
 import (
+	"temporal_microservices/context"
 	"temporal_microservices/domain/square"
 	"temporal_microservices/domain/volume"
+	"temporal_microservices/tracing"
 	"testing"
 
 	"github.com/leonelquinteros/gorand"
@@ -22,9 +24,10 @@ func TestIndexationWorkflowTestSuite(t *testing.T) {
 
 func (s *IndexationWorkflowTestSuite) Test_WorkflowSuccess() {
 	env := s.NewTestWorkflowEnvironment()
-	squareService := square.Service{}
+	squareService, err := square.MakeService(context.SimpleRegistrar{}, tracing.NoopTracer{})
+	s.NoError(err)
 	env.RegisterActivity(squareService.CalculateRectangleSquare)
-	volumeService := volume.Service{}
+	volumeService := volume.MakeService(tracing.NoopTracer{})
 	env.RegisterActivity(volumeService.CalculateParallelepipedVolume)
 
 	pp, err := makeParallelepipeds(276, true)
@@ -45,9 +48,10 @@ func (s *IndexationWorkflowTestSuite) Test_WorkflowSuccess() {
 
 func (s *IndexationWorkflowTestSuite) Test_WorkflowFailNoInput() {
 	env := s.NewTestWorkflowEnvironment()
-	squareService := square.Service{}
+	squareService, err := square.MakeService(context.SimpleRegistrar{}, tracing.NoopTracer{})
+	s.NoError(err)
 	env.RegisterActivity(squareService.CalculateRectangleSquare)
-	volumeService := volume.Service{}
+	volumeService := volume.MakeService(tracing.NoopTracer{})
 	env.RegisterActivity(volumeService.CalculateParallelepipedVolume)
 
 	pp, err := makeParallelepipeds(0, true)
@@ -63,9 +67,10 @@ func (s *IndexationWorkflowTestSuite) Test_WorkflowFailNoInput() {
 
 func (s *IndexationWorkflowTestSuite) Test_WorkflowFailNoIDs() {
 	env := s.NewTestWorkflowEnvironment()
-	squareService := square.Service{}
+	squareService, err := square.MakeService(context.SimpleRegistrar{}, tracing.NoopTracer{})
+	s.NoError(err)
 	env.RegisterActivity(squareService.CalculateRectangleSquare)
-	volumeService := volume.Service{}
+	volumeService := volume.MakeService(tracing.NoopTracer{})
 	env.RegisterActivity(volumeService.CalculateParallelepipedVolume)
 
 	pp, err := makeParallelepipeds(276, false)
